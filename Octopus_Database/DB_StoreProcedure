@@ -1,0 +1,115 @@
+DB Configuration: 
+Endpoint: jliudb.ct8vehnhv9o3.us-east-1.rds.amazonaws.com
+Port: 3306 
+DB Name: mtr_database
+username: jenniferliu1272
+
+# In case DB gets deleted, this file can recreate 
+# the structure of the database as it was before 
+
+create table Octopus
+(
+	OctopusID int auto_increment
+		primary key,
+	currentAmount float default '0' null
+)
+;
+
+create table transactionHistory
+(
+	OctopusID int null,
+	transactionID int auto_increment
+		primary key,
+	amountLeft float null,
+	name varchar(100) null,
+	amountSpent float unsigned null,
+	amountAdded   FLOAT UNSIGNED NULL,
+	created_on datetime default CURRENT_TIMESTAMP not null,
+	constraint fk_octopus
+		foreign key (OctopusID) references Octopus (OctopusID)
+			on update cascade on delete cascade
+)
+;
+
+create index fk_octopus
+	on transactionHistory (OctopusID)
+;
+
+
+**Add Octopus**
+CREATE PROCEDURE addOctopus(IN OctopusId INT, IN CurrentAmount FLOAT)
+  BEGIN
+    IF CurrentAmount <= -1 THEN
+      INSERT INTO Octopus (OctopusID) VALUE (OctopusId);
+    ELSE
+      INSERT INTO Octopus (OctopusID, currentAmount) VALUES (OctopusId, CurrentAmount);
+    END IF;
+  END;
+  
+**addTransaction**
+CREATE PROCEDURE addTransaction(IN OctopusId INT, IN Name VARCHAR(100), IN AmountSpent FLOAT UNSIGNED)
+  BEGIN
+     DECLARE Status INT;
+     DECLARE AmountLeft FLOAT;
+     DECLARE finalAmount FLOAT;
+
+     SET AmountLeft = (SELECT currentAmount FROM mtr_database.Octopus WHERE Octopus.OctopusID=OctopusId);
+     IF AmountSpent < AmountLeft THEN
+       SET status = 1;
+
+       SET finalAmount = AmountLeft - AmountSpent;
+
+       INSERT INTO transactionHistory (OctopusID, AmountLeft, name, amountSpent) VALUES
+         (OctopusId, finalAmount, Name, AmountSpent);
+
+       UPDATE Octopus
+         SET currentAmount = finalAmount
+       WHERE Octopus.OctopusId=OctopusId;
+       COMMIT;
+      ELSEIF AmountSpent > AmountLeft THEN
+       SET Status = -1;
+      ELSE
+        SET Status = -2;
+      END IF;
+     SELECT Status;
+  END;
+
+
+  
+**getTransaction**
+CREATE PROCEDURE getTransactions(IN OctopusId INT)
+  BEGIN
+    SELECT * FROM transactionHistory WHERE transactionHistory.OctopusID=OctopusId;
+  END;
+
+test
+CREATE PROCEDURE test()
+  BEGIN
+    SELECT * FROM Octopus;
+  END;
+  
+**topUp**
+CREATE PROCEDURE topUp(IN OctopusId INT, IN currAmount FLOAT UNSIGNED)
+  BEGIN
+    DECLARE amountHave FLOAT;
+    DECLARE updateAmount FLOAT;
+    DECLARE Status BOOLEAN;
+
+    SET Status = (SELECT EXISTS(SELECT * FROM Octopus WHERE Octopus.OctopusID=OctopusId));
+
+    IF (Status = TRUE) THEN
+      SET amountHave = (SELECT currentAmount FROM Octopus WHERE Octopus.OctopusID=OctopusId);
+      SET updateAmount = amountHave + currAmount;
+
+      /* Add a transaction slip indicating a top up transaction has occurred */
+      INSERT INTO mtr_database.transactionHistory (OctopusID, amountLeft, name, amountAdded)
+      VALUES (OctopusId, updateAmount, 'Octopus Top Up', currAmount);
+
+      /* Update Octopus so it is current amount */
+      UPDATE Octopus
+      SET currentAmount=updateAmount
+      WHERE OctopusID=OctopusId;
+      COMMIT;
+    END IF;
+    SELECT Status, amountHave, updateAmount;
+  END;

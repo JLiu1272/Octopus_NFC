@@ -1,0 +1,32 @@
+## Copy and paste test functions onto datagrid once it is connected to 
+## database 
+
+## Testing addOctopus functionality ##
+#CALL addOctopus(189210, -1);
+#CALL addOctopus(189211, -1);
+#CALL addOctopus(189212, -1);
+#CALL addOctopus(189213, -1);
+#CALL addOctopus(189214, -1);
+
+## Testing TopUp Functionality ##
+#CALL topUp(189210, 100);
+#CALL topUp(189211, 50);
+#CALL topUp(189212, 2000);
+#CALL topUp(189213, 10);
+#CALL topUp(189214, -1);
+
+## Testing addTransaction ##
+#CALL addTransaction(189210, 'Adafruit', 22.2);
+#CALL addTransaction(189210, 'SeedStudio', 14.2);
+#CALL addTransaction(1000000, 'SeedStudio', 14.2);
+
+## Testing topUp ##
+#CALL topUp(189210, 50); ## Should return 1
+#CALL topUp(199999, 50); ## Should return 0
+
+## Testing topUp with addTransaction new entry ##
+#CALL topUp(189210, 50);
+
+## Testing getTransaction ##
+## CALL getTransactions(189211); ##
+#CALL getTransactions(189210);

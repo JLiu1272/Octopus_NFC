@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">UITesting</string>
+    <string name="action_settings">Settings</string>
+    <string name="desc">Octopus Card</string>
+    <string name="octopusID">Octopus ID</string>
+    <string name="title_activity_card_details">cardDetails</string>
+    <string name="service_name">CardEmulation Sample</string>
+    <string name="title_activity_card_action__layout">CardAction_Layout</string>
+    <string name="card_title">Sample Octopus Card</string>
+    <string name="update_action">Update</string>
+    <string name="transaction_success">Transaction Succeeded</string>
+    <string name="transaction_failed">Transaction Failed</string>
+    <string name="title_activity_failed">FailedActivity</string>
+    <string name="title_activity_success">SuccessActivity</string>
+    <string name="account_number">Account Number</string>
+    <string name="title_activity_topup">topup</string>
+    <string name="topup_amount">Amount</string>
+</resources>
